@@ -15,31 +15,41 @@ class DSDescriptor:
     ######################
     def __init__(self) -> None:
         self._meta={
+            "size":1,
             "name":"new_dataset",
             "id":-1, # -1 means it's not registered
         }
-        self.image={
-            "stereo":0,
-            "img":[None],
-            "mask":[None],
-            "pose":[None],
+        self.group=[dict()]
+        self.group[0]["image"]={
+            "img":None,
+            "mask":None,
+            "pose":None,
         }
-        self.intrinsic=None
-        self.ground_truth={
+        self.group[0]["intrinsic"]={
             "type":None,
             "path":None,
         }
-        self.shape_prior=None
-        self.light=None
+        self.group[0]["ground_truth"]={
+            "type":None,
+            "path":None,
+        }
+        self.group[0]["shape_prior"]={
+            "type":None,
+            "path":None
+        }
+        self.group[0]["light"]=None
 
     def __from_json(self, ds_name) -> None:
         with open(DATASET_PATH+ds_name+"/"+DESCRIPTOR_FILE_NAME) as fp:
             jo=json.load(fp)
-            # parse fields here
-            # TODO use a JSONDecoder
-            for k in self.json_field:
-                setattr(self,k,jo[k])
+            self.group=[]
+            for item in jo:
+                new_obj=dict()
+                for k in self.json_field:
+                    new_obj[k]=item[k]
+                self.group.append(new_obj)
             self._meta["name"]=ds_name
+            self._meta["size"]=len(self.group)
     
     @classmethod
     def from_file(cls, ds_name):
@@ -51,13 +61,6 @@ class DSDescriptor:
             raise
         else:
             return newObj
-    
-    @classmethod
-    def get_valid_count(cls):
-        return cls._size
-
-    def register(self, id):
-        self._meta.id=id
 
     # create descriptor for existing unstructured dataset
     @staticmethod
@@ -86,21 +89,18 @@ class DSDescriptor:
         
 class DSDescriptorEncoder(json.JSONEncoder):
     def default(self, dobj:DSDescriptor):
-        fields=dobj.__dict__
+        group=dobj.group
         json_field=dobj.json_field
-        for k in list(fields.keys()):
-            if k not in json_field:
-                del fields[k]
-        return fields
+        return group
 
 
 if __name__ == "__main__":
-    # ds=DSDescriptor()
-    # ds.create_new_dataset()
     ds=DSDescriptor()
-    ds.create_descriptor_file("paper1")
+    ds.create_new_dataset()
+    ds=DSDescriptor()
+    ds.create_descriptor_file("sample")
 
-    # ds=DSDescriptor.from_file("apple")
+    ds=DSDescriptor.from_file("apple")
 
-    # import pdb; pdb.set_trace()
+    import pdb; pdb.set_trace()
 

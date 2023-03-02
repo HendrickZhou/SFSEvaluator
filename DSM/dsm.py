@@ -42,48 +42,62 @@ class DatasetObj:
         return self.name == other.name
     
     def lazy_loading(func):
-        def inner(self):
+        def inner(*args):
+            self=args[0]
+            idx=args[1]
             if self.loaded:
-                return func(self)
+                if idx>=self.size:
+                    print("index out of bound for this dataset")
+                    print("setting the default idx=0")
+                    args[1]=0
+                    return func(self,0)
+                return func(*args)
             # first time load
             try:
-                self.descriptor=DSDescriptor.from_file(self.name)
+                descriptor=DSDescriptor.from_file(self.name)
+                self.group=descriptor.group
+                self.size=descriptor._meta["size"]
             except Exception as err:
                 print("dataset:"+self.name+" is not in legal structure")
                 print("unregister this dataset")
                 raise
             else:
                 self.loaded=True
-                return func(self)
+                if idx>=self.size:
+                    print("index out of bound for this dataset")
+                    print("setting the default idx=0")
+                    return func(self,0)
+                return func(*args)
         return inner
 
     @lazy_loading
-    def get_images(self)->list[str]:
-        return self.descriptor.image["img"]
+    def get_image(self,idx)->str:
+        return self.group[idx]["image"]["img"]
     
     @lazy_loading
-    def get_masks(self)->list[str]:
-        return self.descriptor.image["mask"]
+    def get_mask(self,idx=0)->str:
+        return self.group[idx]["image"]["mask"]
         
     @lazy_loading
-    def get_poses(self)->list[str]:
-        return self.descriptor.image["pose"]
+    def get_pose(self,idx=0)->str:
+        return self.group[idx]["image"]["pose"]
 
     @lazy_loading
-    def get_intrinsic(self)->str:
-        return self.descriptor.intrinsic
+    def get_intrinsic(self,idx=0):
+        return self.group[idx]["intrinsic"]["path"],self.group[idx]["intrinsic"]["type"] 
 
     @lazy_loading
-    def get_ground_truth(self):
-        return self.descriptor.ground_truth["path"],self.descriptor.ground_truth["type"]
+    def get_ground_truth(self,idx=0):
+        return self.group[idx]["ground_truth"]["path"],self.group[idx]["ground_truth"]["type"]
 
     @lazy_loading
-    def get_shape_prior(self):
-        return self.descriptor.shape_prior
+    def get_shape_prior(self,idx=0):
+        return self.group[idx]["shape_prior"]["path"],self.group[idx]["shape_prior"]["type"]
+ 
 
     @lazy_loading
-    def get_light(self):
-        return self.descriptor.light
+    def get_light(self,idx=0):
+        return self.group[idx]["light"]
 
 
 class DSM:
@@ -98,6 +112,7 @@ class DSM:
             first=True
             cache_path.touch()
         self.__wakeup(first)
+        print("dsm activated")
 
     def __wakeup(self,first):
         # scan through the folder and check if cache is intacted
@@ -203,10 +218,12 @@ class DSM:
 
 if __name__=="__main__":
     dsm=DSM()
-    dsm.reg("apple")
+    dsm.reg("augustus-ps")
     dsm.reg("paper1")
     dsm.ls()
     r1=dsm.get_all()
-    r2=dsm.get_by_name("apple")
-    r3=dsm.get_by_id(2)
+    r2=dsm.get_by_name("augustus-ps")
+    r3=dsm.get_by_id(1)
+    # r3.get_image(1)
     import pdb; pdb.set_trace()
+    r3
