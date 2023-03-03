@@ -8,7 +8,7 @@ import json
 import os, sys; sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 from config import *
 from llist import dllist,dllistnode
-from descriptor import DSDescriptor,DESCRIPTOR_FILE_NAME
+from .descriptor import DSDescriptor,DESCRIPTOR_FILE_NAME
 
 
 """
@@ -28,12 +28,13 @@ Once registered, name should never be modified
 
 """
 
-INDEX_FILE="./ds_index_file.json"
+INDEX_FILE="ds_index_file.json"
 
 class DatasetObj:
     def __init__(self,name) -> None:
         self.name=name
         self.loaded=False
+        self.abs_path=DATASET_PATH+self.name+"/"
         # self.descriptor=DSDescriptor.from_file(name)
 
     def __eq__(self, other): 
@@ -69,33 +70,60 @@ class DatasetObj:
                     return func(self,0)
                 return func(*args)
         return inner
+    
+    def add_abs_path(func):
+        def inner(*args):
+            self=args[0]
+            ret=func(*args)
+            if ret==None:
+                return ret
+            return self.abs_path+ret
+        return inner
 
     @lazy_loading
-    def get_image(self,idx)->str:
+    @add_abs_path
+    def get_image(self,idx=0)->str:
         return self.group[idx]["image"]["img"]
     
     @lazy_loading
+    @add_abs_path
     def get_mask(self,idx=0)->str:
         return self.group[idx]["image"]["mask"]
         
     @lazy_loading
+    @add_abs_path
     def get_pose(self,idx=0)->str:
         return self.group[idx]["image"]["pose"]
 
     @lazy_loading
+    @add_abs_path
     def get_intrinsic(self,idx=0):
-        return self.group[idx]["intrinsic"]["path"],self.group[idx]["intrinsic"]["type"] 
+        return self.group[idx]["intrinsic"]["path"]
+    
+    @lazy_loading
+    def get_intrinsic_type(self,idx=0):
+        return self.group[idx]["intrinsic"]["type"] 
 
     @lazy_loading
+    @add_abs_path
     def get_ground_truth(self,idx=0):
-        return self.group[idx]["ground_truth"]["path"],self.group[idx]["ground_truth"]["type"]
+        return self.group[idx]["ground_truth"]["path"]
+    
+    @lazy_loading
+    def get_ground_truth_type(self,idx=0):
+        self.group[idx]["ground_truth"]["type"]
 
     @lazy_loading
+    @add_abs_path
     def get_shape_prior(self,idx=0):
-        return self.group[idx]["shape_prior"]["path"],self.group[idx]["shape_prior"]["type"]
- 
+        return self.group[idx]["shape_prior"]["path"]
+    
+    @lazy_loading
+    def get_shape_prior_type(self,idx=0):
+        return self.group[idx]["shape_prior"]["type"]
 
     @lazy_loading
+    @add_abs_path
     def get_light(self,idx=0):
         return self.group[idx]["light"]
 
@@ -106,11 +134,13 @@ class DSM:
     __lst=dllist() # llist of DatasetObj
 
     def __init__(self) -> None:
-        cache_path=Path(INDEX_FILE)
+        lib_path=Path(__file__).parent.resolve()
+        cache_path=Path.joinpath(lib_path, INDEX_FILE)
         first=False
         if not cache_path.is_file():
             first=True
             cache_path.touch()
+        self.cache_path=cache_path
         self.__wakeup(first)
         print("dsm activated")
 
@@ -120,7 +150,7 @@ class DSM:
         # initialize all dataset objects
         if first: 
             return
-        with open(INDEX_FILE,'r') as fp:
+        with open(self.cache_path,'r') as fp:
             try:
                 jo=json.load(fp)
             except Exception:
@@ -141,7 +171,7 @@ class DSM:
             "names":list(self.__set),
         }
         jo=json.dumps(dict_obj)
-        with open(INDEX_FILE, 'w') as fp:
+        with open(self.cache_path, 'w') as fp:
             fp.write(jo)
     
     def __get(self,item:str):

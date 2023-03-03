@@ -26,7 +26,7 @@ Once registered, name should never be modified
 
 """
 
-INDEX_FILE="./method_index_file.json"
+INDEX_FILE="method_index_file.json"
 METHOD_DESCRIPTOR_FILE="API.json"
 
 class MethodDescriptor:
@@ -84,11 +84,13 @@ class CBM:
     __lst=dllist() # llist of DatasetObj
 
     def __init__(self) -> None:
-        cache_path=Path(INDEX_FILE)
+        lib_path=Path(__file__).parent.resolve()
+        cache_path=Path.joinpath(lib_path, INDEX_FILE)
         first=False
         if not cache_path.is_file():
             first=True
             cache_path.touch()
+        self.cache_path=cache_path
         self.__wakeup(first)
         print("cbm activated")
 
@@ -98,7 +100,7 @@ class CBM:
         # initialize all dataset objects
         if first: 
             return
-        with open(INDEX_FILE,'r') as fp:
+        with open(self.cache_path,'r') as fp:
             try:
                 jo=json.load(fp)
             except Exception:
@@ -119,7 +121,7 @@ class CBM:
             "names":list(self.__set),
         }
         jo=json.dumps(dict_obj)
-        with open(INDEX_FILE, 'w') as fp:
+        with open(self.cache_path, 'w') as fp:
             fp.write(jo)
     
     def __get(self,item:str):
