@@ -97,10 +97,10 @@ class DSDescriptorEncoder(json.JSONEncoder):
 if __name__ == "__main__":
     ds=DSDescriptor()
     ds.create_new_dataset()
-    ds=DSDescriptor()
-    ds.create_descriptor_file("sample")
+    # ds=DSDescriptor()
+    # ds.create_descriptor_file("figure-mvs")
 
-    ds=DSDescriptor.from_file("apple")
+    # ds=DSDescriptor.from_file("apple")
 
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
 

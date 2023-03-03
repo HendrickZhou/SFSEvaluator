@@ -1,15 +1,13 @@
 """
 author: Hang Zhou
 
-Dataset Management toolkit
+Method Management toolkit
 """
 from pathlib import Path
 import json
 import os, sys; sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 from config import *
 from llist import dllist,dllistnode
-from descriptor import DSDescriptor,DESCRIPTOR_FILE_NAME
-
 
 """
 * start of dsm
@@ -28,79 +26,59 @@ Once registered, name should never be modified
 
 """
 
-INDEX_FILE="./ds_index_file.json"
+INDEX_FILE="./method_index_file.json"
+METHOD_DESCRIPTOR_FILE="API.json"
 
-class DatasetObj:
+class MethodDescriptor:
+    def __init__(self) -> None:
+        self.type=None
+        self.api=None
+        self._meta=dict()
+
+    @classmethod
+    def from_file(cls,method_name):
+        newObj=cls()
+        try:
+            newObj.__from_json(method_name)
+        except Exception as err:
+            print("can't load descriptor file")
+            raise
+        else:
+            return newObj
+
+    def __from_json(self, method_name):
+        with open(METHOD_PATH+method_name+"/"+METHOD_DESCRIPTOR_FILE) as fp:
+            jo=json.load(fp)
+            self.type=jo["type"]
+            self.api=jo["api"]
+            self._meta["name"]=method_name
+
+class MethodObj:
     def __init__(self,name) -> None:
         self.name=name
-        self.loaded=False
-        # self.descriptor=DSDescriptor.from_file(name)
+        self.__load(name)
 
     def __eq__(self, other): 
-        if not isinstance(other, DatasetObj):
+        if not isinstance(other, MethodObj):
             return NotImplemented
         return self.name == other.name
     
-    def lazy_loading(func):
-        def inner(*args):
-            self=args[0]
-            idx=args[1]
-            if self.loaded:
-                if idx>=self.size:
-                    print("index out of bound for this dataset")
-                    print("setting the default idx=0")
-                    args[1]=0
-                    return func(self,0)
-                return func(*args)
-            # first time load
-            try:
-                descriptor=DSDescriptor.from_file(self.name)
-                self.group=descriptor.group
-                self.size=descriptor._meta["size"]
-            except Exception as err:
-                print("dataset:"+self.name+" is not in legal structure")
-                print("unregister this dataset")
-                raise
-            else:
-                self.loaded=True
-                if idx>=self.size:
-                    print("index out of bound for this dataset")
-                    print("setting the default idx=0")
-                    return func(self,0)
-                return func(*args)
-        return inner
+    def __load(self,name):
+        obj=MethodDescriptor.from_file(name)
+        self.type=obj.type
+        self.api=obj.api
 
-    @lazy_loading
-    def get_image(self,idx)->str:
-        return self.group[idx]["image"]["img"]
-    
-    @lazy_loading
-    def get_mask(self,idx=0)->str:
-        return self.group[idx]["image"]["mask"]
-        
-    @lazy_loading
-    def get_pose(self,idx=0)->str:
-        return self.group[idx]["image"]["pose"]
+    def get_type(self):
+        return self.type
 
-    @lazy_loading
-    def get_intrinsic(self,idx=0):
-        return self.group[idx]["intrinsic"]["path"],self.group[idx]["intrinsic"]["type"] 
+    def get_folder(self):
+        return METHOD_PATH+self.name+"/"
 
-    @lazy_loading
-    def get_ground_truth(self,idx=0):
-        return self.group[idx]["ground_truth"]["path"],self.group[idx]["ground_truth"]["type"]
-
-    @lazy_loading
-    def get_shape_prior(self,idx=0):
-        return self.group[idx]["shape_prior"]["path"],self.group[idx]["shape_prior"]["type"]
- 
-
-    @lazy_loading
-    def get_light(self,idx=0):
-        return self.group[idx]["light"]
+    def get_api_name(self):
+        return self.api
 
 
-class DSM:
+class CBM:
     __size=0
     __set=set()
     __lst=dllist() # llist of DatasetObj
@@ -112,7 +90,7 @@ class DSM:
             first=True
             cache_path.touch()
         self.__wakeup(first)
-        print("dsm activated")
+        print("cbm activated")
 
     def __wakeup(self,first):
         # scan through the folder and check if cache is intacted
@@ -131,7 +109,7 @@ class DSM:
             return
         self.__size=jo["size"]
         for name in jo["names"]:
-            self.__lst.append(dllistnode(DatasetObj(name)))
+            self.__lst.append(dllistnode(MethodObj(name)))
             self.__set.add(name)
         # TODO check safety, but for now just ignore it
 
@@ -148,7 +126,7 @@ class DSM:
         
         if item not in self.__set:
             return None
-        the_node=DatasetObj(item)
+        the_node=MethodObj(item)
         for i in range(0, self.__lst.size):
             # import pdb; pdb.set_trace()
             if self.__lst.nodeat(i).value==the_node:
@@ -159,39 +137,36 @@ class DSM:
         if item in self.__set:
             return
         self.__size+=1
-        new_node = dllistnode(DatasetObj(item))
+        new_node = dllistnode(MethodObj(item)) 
         self.__lst.append(new_node)
         self.__set.add(item)
 
-    def __del(self,item:str):
-        if item not in self.__set:
-            return
-        self.__size-=1
-        new_node = DatasetObj(item)
-        del self.__set[item]
-        for i in range(0,self.__lst.size):
-            target=self.__lst.nodeat(i).value
-            if(new_node==target):
-                self.__lst.remove(target)
+    # def __del(self,item:str):
+    #     if item not in self.__set:
+    #         return
+    #     self.__size-=1
+    #     new_node = DatasetObj(item)
+    #     del self.__set[item]
+    #     for i in range(0,self.__lst.size):
+    #         target=self.__lst.nodeat(i).value
+    #         if(new_node==target):
+    #             self.__lst.remove(target)
 
     def reg(self, name): # only regist, but could break at runtime
         # check descriptor file is there
-        thepath=Path(DATASET_PATH+name)
-        thefile=Path(DATASET_PATH+name+"/"+DESCRIPTOR_FILE_NAME)
+        thepath=Path(METHOD_PATH+name)
+        thefile=Path(METHOD_PATH+name+"/"+METHOD_DESCRIPTOR_FILE)
         if not thepath.exists():
-            raise Exception("dataset folder doesn't exist")
+            raise Exception("method folder doesn't exist")
         if not thefile.exists():
             raise Exception("descriptor file not found")
         self.__add(name)
         self.__push()
 
-    def unreg(self,name):
-        pass
-
     def ls(self):
         # only print name and id
         print("-------------------------------")
-        print("id\t｜ name of datast\t|meta information")
+        print("id\t｜ name of method\t|meta information")
         for i,node in enumerate(self.__lst):
             print(str(i+1)+"\t|"+node.name+"\t\t\t|")
 
@@ -201,29 +176,29 @@ class DSM:
             all_obj.append(lobj)
         return all_obj
     
-    def get_by_name(self,name)->DatasetObj: # id is just the index in the dataset
+    def get_by_name(self,name):
         # get name of id
         result = self.__get(name)
         if result==None:
-            print("dataset name not exist")
+            print("method name not exist")
         return result
         
-    def get_by_id(self,id)->DatasetObj: # start from 1
+    def get_by_id(self,id): # start from 1
         if id>self.__lst.size:
-            print("dataset id not exist")
+            print("method id not exist")
             return None
         
         return self.__lst.nodeat(id-1).value
     
 
 if __name__=="__main__":
-    dsm=DSM()
-    dsm.reg("dino")
-    dsm.reg("paper1")
-    dsm.ls()
-    r1=dsm.get_all()
-    r2=dsm.get_by_name("augustus-ps")
-    r3=dsm.get_by_id(1)
+    cbm=CBM()
+    cbm.reg("SIRFS")
+    cbm.reg("variational_admm_sfs")
+    cbm.ls()
+    r1=cbm.get_all()
+    r2=cbm.get_by_name("SIRFS")
+    r3=cbm.get_by_id(1)
     # r3.get_image(1)
     import pdb; pdb.set_trace()
     r3

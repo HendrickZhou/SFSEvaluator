@@ -4,7 +4,7 @@ metrics object
 should contains the 4d tabulate structure,
 x: algorithm
 y: dataset(dataset tags:object,light,camera prespective)
-z: condition(hyper-params, shape_prior, initialization)
+z: condition(hyper-params, shape_prior)
 m: metrics
 """
 
