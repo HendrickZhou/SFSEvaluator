@@ -71,11 +71,13 @@ class DatasetObj:
                 return func(*args)
         return inner
     
+    # add absolute path if the field is valid
+    # otherwise return it as None
     def add_abs_path(func):
         def inner(*args):
             self=args[0]
             ret=func(*args)
-            if ret==None:
+            if ret is None:
                 return ret
             return self.abs_path+ret
         return inner
@@ -126,6 +128,9 @@ class DatasetObj:
     @add_abs_path
     def get_light(self,idx=0):
         return self.group[idx]["light"]
+
+    def get_folder(self):
+        return self.abs_path
 
 
 class DSM:
