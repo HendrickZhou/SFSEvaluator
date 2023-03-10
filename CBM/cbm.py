@@ -1,30 +1,12 @@
+""" Method Management toolkit
+@author: Hang Zhou
 """
-author: Hang Zhou
 
-Method Management toolkit
-"""
 from pathlib import Path
 import json
 import os, sys; sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 from config import *
 from llist import dllist,dllistnode
-
-"""
-* start of dsm
-dsm will start by reading the cached file(managed by framework), ignoring all unregisterd folder
-If the cache file isn't correctly mapped to folders(some folder is missing), will update the cache file
-
-* create new dataset
-on creation, dataset should be empty, the folder is there, but it's not a valid dataset
-after everything is done, should call register to formally add it to the management
-
-* register a dataset
-the correctness of dataset should be up to user
-Once registered, name should never be modified
-
-* get all dataset
-
-"""
 
 INDEX_FILE="method_index_file.json"
 METHOD_DESCRIPTOR_FILE="API.json"
@@ -95,9 +77,11 @@ class CBM:
         print("cbm activated")
 
     def __wakeup(self,first):
-        # scan through the folder and check if cache is intacted
-        # if not, update cache
-        # initialize all dataset objects
+        """
+        scan through the folder and check if cache is intacted
+        if not, update cache
+        initialize all dataset objects
+        """
         if first: 
             return
         with open(self.cache_path,'r') as fp:
@@ -185,7 +169,8 @@ class CBM:
             print("method name not exist")
         return result
         
-    def get_by_id(self,id): # start from 1
+    def get_by_id(self,id): 
+        # start from 1
         if id>self.__lst.size:
             print("method id not exist")
             return None

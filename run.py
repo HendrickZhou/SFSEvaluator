@@ -28,22 +28,19 @@ def RUN(method_id=None, dataset_id=None, method_name=None, dataset_name=None):
     _run(codebase_obj,dataset_obj,0)
 
 
-
-
-
-"""
-input_dir <- dataset_obj.info
-options = {
-"shape_prior":1,
-"light_prior":1,
-"albedo_prior":0, #by default, optional
-other optionals
-""
-}
-options are controled by user, or by config files, to FINE-CONTROL the algorithm behaviour, it's optional
-hyper_params are controled by user, or by config files, to FINE-TUNE the algorithm, it's optional 
-"""
 def _run(codebase_obj:MethodObj, dataset_obj:DatasetObj, stereo_idx:int):
+    """
+    input_dir <- dataset_obj.info
+    options = {
+    "shape_prior":1,
+    "light_prior":1,
+    "albedo_prior":0, #by default, optional
+    other optionals
+    ""
+    }
+    options are controled by user, or by config files, to FINE-CONTROL the algorithm behaviour, it's optional
+    hyper_params are controled by user, or by config files, to FINE-TUNE the algorithm, it's optional 
+    """
     code_type=codebase_obj.get_type()
     code_folder=codebase_obj.get_folder()
     code_api_name=codebase_obj.get_api_name()

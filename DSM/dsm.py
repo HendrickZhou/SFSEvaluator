@@ -1,17 +1,4 @@
-"""
-author: Hang Zhou
-
-Dataset Management toolkit
-"""
-from pathlib import Path
-import json
-import os, sys; sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
-from config import *
-from llist import dllist,dllistnode
-from .descriptor import DSDescriptor,DESCRIPTOR_FILE_NAME
-
-
-"""
+""" Dataset Management toolkit
 * start of dsm
 dsm will start by reading the cached file(managed by framework), ignoring all unregisterd folder
 If the cache file isn't correctly mapped to folders(some folder is missing), will update the cache file
@@ -26,7 +13,15 @@ Once registered, name should never be modified
 
 * get all dataset
 
+@author: Hang Zhou
 """
+
+from pathlib import Path
+import json
+import os, sys; sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
+from config import *
+from llist import dllist,dllistnode
+from .descriptor import DSDescriptor,DESCRIPTOR_FILE_NAME
 
 INDEX_FILE="ds_index_file.json"
 
@@ -150,9 +145,11 @@ class DSM:
         print("dsm activated")
 
     def __wakeup(self,first):
-        # scan through the folder and check if cache is intacted
-        # if not, update cache
-        # initialize all dataset objects
+        """
+        scan through the folder and check if cache is intacted
+        if not, update cache
+        initialize all dataset objects
+        """
         if first: 
             return
         with open(self.cache_path,'r') as fp:

@@ -1,7 +1,7 @@
 """
-Author: Hang Zhou
-
 this script serves as a singleton matlab engine for all the scripts across this project
+
+@Author: Hang Zhou
 """
 
 import matlab

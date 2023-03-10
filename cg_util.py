@@ -3,22 +3,22 @@ from matlab_agent import get_eng
 import matplotlib.pyplot as plt
 import matlab
 import open3d as o3d
-
-
-# since Python load each module as singletons, all codes can be considered to run once
-
-
-
+from math import isnan
 
 def mat2np2d(mat:matlab.double)->np.array:
-    # convert 2d matlab matrix to numpy 2d array
+    """convert 2d matlab matrix to numpy 2d array"""
     eng=get_eng()
     size_mat=eng.size(mat)
     w=size_mat[0][0]
     h=size_mat[0][1]
-    np.zeros()
-    matlab.double()
-    return
+    result=np.zeros((w,h))
+    for i in range(w):
+        for j in range(h):
+            the_val=mat[i][j]
+            if isnan(the_val):
+                continue
+            result[i][j]=the_val
+    return result
 
 class ThreeDObject():
     def __init__(self) -> None:
@@ -39,6 +39,13 @@ class ThreeDObject():
     @classmethod
     def from_file(cls,td_file):
         new_obj=cls()
+
+    def get_depth():
+        """get the depth in numpy.ma format, with the mask property applied"""
+        ny.
+
+    def get_normal():
+        pass
 
     @staticmethod
     def get_surface_normal_by_depth(depth, K=None):
