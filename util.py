@@ -14,3 +14,10 @@ def display_mat():
 # def create_file(path, name):
 #     if not os.
 
+def Print(msg):
+    print("********************")
+    print("* "+msg)
+    print("********************")
+
+def breaker():
+    print("********************")

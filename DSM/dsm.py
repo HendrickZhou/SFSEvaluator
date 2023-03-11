@@ -21,7 +21,7 @@ import json
 import os, sys; sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 from config import *
 from llist import dllist,dllistnode
-from .descriptor import DSDescriptor,DESCRIPTOR_FILE_NAME
+from descriptor import DSDescriptor,DESCRIPTOR_FILE_NAME
 
 INDEX_FILE="ds_index_file.json"
 

@@ -1,51 +1,60 @@
+""" 3D object utility
+define the depth object for SFS task
+@Author: Hang Zhou
+"""
+
 import numpy as np
+import numpy.ma as ma
 from matlab_agent import get_eng
 import matplotlib.pyplot as plt
 import matlab
 import open3d as o3d
 from math import isnan
 
-def mat2np2d(mat:matlab.double)->np.array:
-    """convert 2d matlab matrix to numpy 2d array"""
-    eng=get_eng()
-    size_mat=eng.size(mat)
-    w=size_mat[0][0]
-    h=size_mat[0][1]
-    result=np.zeros((w,h))
-    for i in range(w):
-        for j in range(h):
-            the_val=mat[i][j]
-            if isnan(the_val):
-                continue
-            result[i][j]=the_val
-    return result
-
 class ThreeDObject():
+    """
+    3d object for processing the depth_map output
+
+    initialize using from_data
+    """
     def __init__(self) -> None:
         self.depth=None
         self.normal=None
         self.K=None
         self.mask=None
+        self.d_ma=None
+        self.n_ma=None
 
     @classmethod
     def from_data(cls, depth:np.array, mask:np.array, normal=None, K=None) -> None:
+        """ build object from data
+        depth: should be a 2d np.array float64
+        mask: should be a np.array convertable to bool array, 0 will be False, others are True
+              since it's optional in logic, it can be all True
+        normal: should be a 2d np.array float64
+        """
         new_obj=cls()
         new_obj.depth=depth
         new_obj.K=K
-        new_obj.mask=mask
+        new_obj.mask=ma.make_mask(mask)
+        new_obj.d_ma = ma.array(new_obj.depth, mask=new_obj.mask)
         if normal is None:
-            new_obj.normal=new_obj.get_surface_normal(depth,K)
+            new_obj.normal=new_obj.get_surface_normal(depth,K) 
+        else:
+            new_obj.normal=normal 
+        new_obj.n_ma = ma.array(new_obj.normal, mask=new_obj.mask)
 
     @classmethod
-    def from_file(cls,td_file):
-        new_obj=cls()
-
-    def get_depth():
-        """get the depth in numpy.ma format, with the mask property applied"""
-        ny.
-
-    def get_normal():
+    def from_image(cls, image):
         pass
+
+    def get_depth(self):
+        """get the depth in numpy.ma format, with the mask property applied"""
+        return self.d_ma
+
+    def get_normal(self):
+       """get the normal in numpy.ma format, with the mask property applied""" 
+       return self.n_ma
 
     @staticmethod
     def get_surface_normal_by_depth(depth, K=None):
@@ -109,7 +118,8 @@ class ThreeDObject():
 
 
 if __name__=="__main__":
-    vis_normal = lambda normal: np.uint8((normal + 1) / 2 * 255)[..., ::-1]
+    # vis_normal = lambda normal: np.uint8((normal + 1) / 2 * 255)[..., ::-1]
 
-    normal1 = get_surface_normal_by_depth(depth, K)    #  spend time: 60ms
-    normal2 = get_normal_map_by_point_cloud(depth, K)  #  spend time: 90m
+    # normal1 = get_surface_normal_by_depth(depth, K)    #  spend time: 60ms
+    # normal2 = get_normal_map_by_point_cloud(depth, K)  #  spend time: 90m
+    pass

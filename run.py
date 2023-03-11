@@ -4,7 +4,8 @@ author: Hang Zhou
 
 from CBM.cbm import MethodObj, CBM
 from DSM.dsm import DatasetObj, DSM
-from util import create_dir
+from util import *
+from io_util import *
 from cg_util import *
 import matlab_agent
 from cal_metric import cal_metrics
@@ -63,31 +64,47 @@ def _run(codebase_obj:MethodObj, dataset_obj:DatasetObj, stereo_idx:int):
 
     # 2. run code
     if(code_type=="matlab"):
-        # import matlab.engine
-        # import matlab
         code_api_name=os.path.splitext(code_api_name)[0]
         eng = get_eng()
         eng.cd(code_folder, nargout=0) # todo raw string
 
         # convert from file to matlab object
-        img=eng.imread(dataset_obj.get_image(stereo_idx))
-        mask=eng.imread(dataset_obj.get_mask(stereo_idx))
-        l_struct=eng.struct2cell(eng.load(dataset_obj.get_light(stereo_idx)))
-        light=l_struct[0]
-        # intrinsic=eng.load(dataset_obj.get_intrinsic(stereo_idx))
-        # shape_prior=eng.load(dataset_obj.get_shape_prior(stereo_idx))
-        intrinsic=eng.eye(3)
-        shape_prior=eng.ones(eng.size(img,1),eng.size(img,2))
-        # shape_prior=0
-        
-        
-        output=eng.feval(code_api_name,img,mask,light,intrinsic,shape_prior)
-        
+        try:
+            img=get_image(dataset_obj.get_image(stereo_idx),FileType.IMG, DataType.MATLAB)
+            mask=get_image(dataset_obj.get_mask(stereo_idx),FileType.IMG,DataType.MATLAB) # TODO maybe support mat?
+            # l_struct=eng.struct2cell(eng.load(dataset_obj.get_light(stereo_idx)))
+            # light=l_struct[0]
+            light=get_mat(dataset_obj.get_light(stereo_idx))
+            intrinsic=get_mat(dataset_obj.get_intrinsic(stereo_idx))
+            if intrinsic is None:
+                intrinsic=eng.eye(3)
+            shape_prior=get_mat(dataset_obj.get_shape_prior(stereo_idx))
+            # shape_prior=eng.ones(eng.size(img,1),eng.size(img,2))
+            # shape_prior=0
+        except Exception as e:
+            breaker()
+            print("dataset load failed")
+            print("please check the dataset")
+            breaker()
+            return
+        else:
+            Print("Dataset loaded successfully")
+            try:
+                output=eng.feval(code_api_name,img,mask,light,intrinsic,shape_prior)
+            except Exception as e:
+                breaker()
+                print("Exception occur during the execution")
+                print("please check the API code!")
+                breaker()
+                return
+            else:
+                Print("SFS algorithm run successfully")
+
         # check correctness of output
         expected_fields=["depth","normal"]
         for field in expected_fields:
             if field not in output:
-                print("output field missing, please check the API script for this codebase")
+                Print("output field missing, please check the API script for this codebase")
                 return
         
         # convert output object to python native object
@@ -101,7 +118,6 @@ def _run(codebase_obj:MethodObj, dataset_obj:DatasetObj, stereo_idx:int):
         tdobj=ThreeDObject()
         tdobj.from_data(depth=depth,mask=mask,normal=normal)
         import pdb;pdb.set_trace()
-        eng.quit()
 
     elif(code_type=="python"):
         print("feature not supported yet")
@@ -118,14 +134,9 @@ def _run(codebase_obj:MethodObj, dataset_obj:DatasetObj, stereo_idx:int):
     else:
         # if there's ground truth, calculate the metrics
         # ground truth is a standard depth image
-        tdobj
         gt_type=dataset_obj.get_ground_truth_type()
         if gt_type is "mat":
-            gt_data=imread(dataset_obj.get_ground_truth())
-            gt_obj=ThreeDObject.from_data(depth=gt_data, mask=mask)
-        else: # other 3d type including ply file
-            gt_obj=ThreeDObject.from_file
-        
+            gt_data=get_image(dataset_obj.get_ground_truth())
         metrics=cal_metrics(tdobj, gt_obj)
 
     # 4. save metrics on database

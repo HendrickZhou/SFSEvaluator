@@ -4,10 +4,12 @@ All the functions need to calculate the metrics
 @Author: Hang Zhou
 """
 
-# cal all metrics
-def cal_metrics():
-    """
+from cg_util import ThreeDObject
 
+# cal all metrics
+def cal_metrics(output:ThreeDObject, ground_truth:ThreeDObject):
+    """
+    
     """
     pass
 
