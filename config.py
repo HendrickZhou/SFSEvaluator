@@ -5,8 +5,7 @@ DSM_PATH=ROOT_PATH+"DSM/"
 # framework path
 DATASET_PATH="/Users/zhouhang/SFSEvaluator/dataset/"
 METHOD_PATH="/Users/zhouhang/SFSEvaluator/codebase/"
-
-
+METRIC_PATH="/Users/zhouhang/SFSEvaluator/metrics_result/"
 
 
 

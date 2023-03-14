@@ -7,8 +7,7 @@ from DSM.dsm import DatasetObj, DSM
 from util import *
 from io_util import *
 from cg_util import *
-import matlab_agent
-from cal_metric import cal_metrics
+from cal_metric import get_metrics,vis_metrics,MetricsDB
 import os
 
 """
@@ -46,7 +45,7 @@ def _run(codebase_obj:MethodObj, dataset_obj:DatasetObj, stereo_idx:int):
     code_folder=codebase_obj.get_folder()
     code_api_name=codebase_obj.get_api_name()
 
-    runtime_dir=create_dir(code_folder,RUNTIME_FOLDER_NAME)
+    runtime_dir=create_dir(ondir=code_folder,name=RUNTIME_FOLDER_NAME)
 
     # 1. preprocess the dataset to complete all necessary field
     # including ground truth
@@ -69,7 +68,8 @@ def _run(codebase_obj:MethodObj, dataset_obj:DatasetObj, stereo_idx:int):
         eng.cd(code_folder, nargout=0) # todo raw string
 
         # convert from file to matlab object
-        try:
+        try: 
+            # TODO add type check!
             img=get_image(dataset_obj.get_image(stereo_idx),FileType.IMG, DataType.MATLAB)
             mask=get_image(dataset_obj.get_mask(stereo_idx),FileType.IMG,DataType.MATLAB) # TODO maybe support mat?
             # l_struct=eng.struct2cell(eng.load(dataset_obj.get_light(stereo_idx)))
@@ -78,9 +78,9 @@ def _run(codebase_obj:MethodObj, dataset_obj:DatasetObj, stereo_idx:int):
             intrinsic=get_mat(dataset_obj.get_intrinsic(stereo_idx))
             if intrinsic is None:
                 intrinsic=eng.eye(3)
-            shape_prior=get_mat(dataset_obj.get_shape_prior(stereo_idx))
-            # shape_prior=eng.ones(eng.size(img,1),eng.size(img,2))
-            # shape_prior=0
+            # shape_prior=get_mat(dataset_obj.get_shape_prior(stereo_idx))
+            shape_prior=get_mat(dataset_obj.get_ground_truth(stereo_idx))
+
         except Exception as e:
             breaker()
             print("dataset load failed")
@@ -90,7 +90,11 @@ def _run(codebase_obj:MethodObj, dataset_obj:DatasetObj, stereo_idx:int):
         else:
             Print("Dataset loaded successfully")
             try:
-                output=eng.feval(code_api_name,img,mask,light,intrinsic,shape_prior)
+                output=eng.feval(code_api_name,img,
+                                 NANfy(mask),
+                                 NANfy(light),
+                                 NANfy(intrinsic),
+                                 NANfy(shape_prior))
             except Exception as e:
                 breaker()
                 print("Exception occur during the execution")
@@ -113,12 +117,9 @@ def _run(codebase_obj:MethodObj, dataset_obj:DatasetObj, stereo_idx:int):
         mask=mat2np2d(mask)
         normal=None
         if output["normal"] is not None:
-            normal=mat2np2d(output["normal"])
+            normal=mat2np3d(output["normal"])
         # create output_obj
-        tdobj=ThreeDObject()
-        tdobj.from_data(depth=depth,mask=mask,normal=normal)
-        import pdb;pdb.set_trace()
-
+        tdobj=ThreeDObject.from_data(depth=depth,mask=mask,normal=normal)
     elif(code_type=="python"):
         print("feature not supported yet")
         return
@@ -127,22 +128,30 @@ def _run(codebase_obj:MethodObj, dataset_obj:DatasetObj, stereo_idx:int):
         return
 
     # 3. calculate metric
+    # visulise the result
+    tdobj.show_depth()
+    tdobj.show_normal()
+
     # get ground truth
     # if not ground truth, save the image
+    import pdb;pdb.set_trace()
     if dataset_obj.get_ground_truth() is None:
-        tdobj.vis_and_save()
+    #    m=vis_metrics(tdobj,)
+        pass
     else:
         # if there's ground truth, calculate the metrics
         # ground truth is a standard depth image
         gt_type=dataset_obj.get_ground_truth_type()
-        if gt_type is "mat":
-            gt_data=get_image(dataset_obj.get_ground_truth())
-        metrics=cal_metrics(tdobj, gt_obj)
+        # if gt_type is "mat":
+        #     gt_data=get_image(dataset_obj.get_ground_truth())
+        # m=get_metrics(tdobj, gt_obj)
 
     # 4. save metrics on database
-    save_metrics(metrics)
+    # with MetricsDB() as mdb:
+    #     mdb.add_result(m)
 
 
 if __name__=="__main__":
-    RUN(method_name="variational_admm_sfs",dataset_name="apple")
+    # RUN(method_name="variational_admm_sfs",dataset_name="apple")
+    RUN(method_name="SIRFS",dataset_name="apple")
 

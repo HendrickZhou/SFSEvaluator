@@ -36,13 +36,21 @@ class ThreeDObject():
         new_obj=cls()
         new_obj.depth=depth
         new_obj.K=K
-        new_obj.mask=ma.make_mask(mask)
+        new_obj.mask=np.invert(ma.make_mask(mask))
+        tmask=np.invert(ma.make_mask(mask))
         new_obj.d_ma = ma.array(new_obj.depth, mask=new_obj.mask)
         if normal is None:
             new_obj.normal=new_obj.get_surface_normal(depth,K) 
         else:
             new_obj.normal=normal 
-        new_obj.n_ma = ma.array(new_obj.normal, mask=new_obj.mask)
+        new_obj.n_ma = ma.array(new_obj.normal, mask=np.repeat(tmask[:,:,np.newaxis],3,axis=2))
+        ma.set_fill_value(new_obj.d_ma,0)
+        ma.set_fill_value(new_obj.n_ma,0)
+        return new_obj
+
+    @staticmethod
+    def normalize(img:np.array):
+        pass
 
     @classmethod
     def from_image(cls, image):
@@ -55,6 +63,16 @@ class ThreeDObject():
     def get_normal(self):
        """get the normal in numpy.ma format, with the mask property applied""" 
        return self.n_ma
+    
+    def show_depth(self):
+        eng=get_eng()
+        eng.figure()
+        eng.imshow(self.d_ma.filled(),[])
+
+    def show_normal(self):
+        eng=get_eng()
+        eng.figure()
+        eng.imshow(self.n_ma.filled(),[])
 
     @staticmethod
     def get_surface_normal_by_depth(depth, K=None):
@@ -112,8 +130,9 @@ class ThreeDObject():
         return normal_map
 
     ####### visualize #######
-    def vis_and_save(self, show_figure=True, save_img=True):
+    def vis_and_save_depth(self,path):
         plt.plot(self.depth)
+        plt.savefig(path)
 
 
 
