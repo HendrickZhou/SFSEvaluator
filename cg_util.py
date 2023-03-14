@@ -40,7 +40,7 @@ class ThreeDObject():
         tmask=np.invert(ma.make_mask(mask))
         new_obj.d_ma = ma.array(new_obj.depth, mask=new_obj.mask)
         if normal is None:
-            new_obj.normal=new_obj.get_surface_normal(depth,K) 
+            new_obj.normal=new_obj.get_surface_normal_by_depth(depth,K) 
         else:
             new_obj.normal=normal 
         new_obj.n_ma = ma.array(new_obj.normal, mask=np.repeat(tmask[:,:,np.newaxis],3,axis=2))
@@ -50,10 +50,6 @@ class ThreeDObject():
 
     @staticmethod
     def normalize(img:np.array):
-        pass
-
-    @classmethod
-    def from_image(cls, image):
         pass
 
     def get_depth(self):
@@ -131,8 +127,9 @@ class ThreeDObject():
 
     ####### visualize #######
     def vis_and_save_depth(self,path):
-        plt.plot(self.depth)
-        plt.savefig(path)
+        eng=get_eng()
+        eng.imshow(self.depth,[])
+        eng.imwrite(self.get_depth().filled(), path, nargout=0)
 
 
 

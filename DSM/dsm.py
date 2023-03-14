@@ -17,6 +17,7 @@ Once registered, name should never be modified
 """
 
 from pathlib import Path
+from io_util import FileType
 import json
 import os, sys; sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 from config import *
@@ -76,6 +77,19 @@ class DatasetObj:
                 return ret
             return self.abs_path+ret
         return inner
+    
+    def encode_type(func):
+        """
+        mat -> FileType.MAT
+        png/jpg/tiff etc -> FileType.IMG
+        """
+        def inner(*args):
+            ret=func(*args)
+            if ret == "mat":
+                return FileType.MAT
+            else:
+                return FileType.IMG
+        return inner
 
     @lazy_loading
     @add_abs_path
@@ -98,6 +112,7 @@ class DatasetObj:
         return self.group[idx]["intrinsic"]["path"]
     
     @lazy_loading
+    @encode_type
     def get_intrinsic_type(self,idx=0):
         return self.group[idx]["intrinsic"]["type"] 
 
@@ -107,8 +122,9 @@ class DatasetObj:
         return self.group[idx]["ground_truth"]["path"]
     
     @lazy_loading
+    @encode_type
     def get_ground_truth_type(self,idx=0):
-        self.group[idx]["ground_truth"]["type"]
+        return self.group[idx]["ground_truth"]["type"]
 
     @lazy_loading
     @add_abs_path
@@ -116,6 +132,7 @@ class DatasetObj:
         return self.group[idx]["shape_prior"]["path"]
     
     @lazy_loading
+    @encode_type
     def get_shape_prior_type(self,idx=0):
         return self.group[idx]["shape_prior"]["type"]
 

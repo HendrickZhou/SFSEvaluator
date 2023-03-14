@@ -17,18 +17,20 @@ dataset_obj: link to the dataset directory
 """
 
 RUNTIME_FOLDER_NAME="sfs_evaluator_runtime"
-LOGGING_FILE_NAME="logging.log"
 
-def RUN(method_id=None, dataset_id=None, method_name=None, dataset_name=None):
+def RUN(method_id=None, dataset_id=None, method_name=None, dataset_name=None,tags=[]):
     cbm=CBM()
     dsm=DSM()
-
+    
     codebase_obj=cbm.get_by_name(method_name)
     dataset_obj=dsm.get_by_name(dataset_name)
-    _run(codebase_obj,dataset_obj,0)
+    # process tags
+    tag_set=set()
+    for tag in tags:
+        tag_set.add(tag)
+    _run(codebase_obj,dataset_obj,0,tag_set)
 
-
-def _run(codebase_obj:MethodObj, dataset_obj:DatasetObj, stereo_idx:int):
+def _run(codebase_obj:MethodObj, dataset_obj:DatasetObj, stereo_idx:int,tag_set):
     """
     input_dir <- dataset_obj.info
     options = {
@@ -134,24 +136,36 @@ def _run(codebase_obj:MethodObj, dataset_obj:DatasetObj, stereo_idx:int):
 
     # get ground truth
     # if not ground truth, save the image
-    import pdb;pdb.set_trace()
-    if dataset_obj.get_ground_truth() is None:
-    #    m=vis_metrics(tdobj,)
-        pass
+    m=None
+    algorithm=codebase_obj.name
+    dataset=dataset_obj.name
+    if dataset_obj.get_ground_truth(stereo_idx) is None:
+        m=vis_metrics(tdobj,
+                      algorithm,
+                      dataset,
+                      tag_set
+                      )
     else:
         # if there's ground truth, calculate the metrics
         # ground truth is a standard depth image
-        gt_type=dataset_obj.get_ground_truth_type()
-        # if gt_type is "mat":
-        #     gt_data=get_image(dataset_obj.get_ground_truth())
-        # m=get_metrics(tdobj, gt_obj)
+        gt_type=dataset_obj.get_ground_truth_type(stereo_idx)
+        gt_path=dataset_obj.get_ground_truth(stereo_idx)
+        img_np=None
+        if gt_type is FileType.MAT:
+            img_np=get_image(gt_path,FileType.MAT,DataType.NUMPY)
+        elif gt_type is FileType.IMG:
+            img_np=get_image(gt_path,FileType.IMG,DataType.NUMPY)
+        else:
+            raise WrongFormatError("unsupported ground truth data type")
+        gt_obj = ThreeDObject.from_data(depth=img_np, mask=mask)
+        m=get_metrics(tdobj, gt_obj,algorithm,dataset,tag_set)
 
     # 4. save metrics on database
-    # with MetricsDB() as mdb:
-    #     mdb.add_result(m)
+    with MetricsDB() as mdb:
+        mdb.add_result(m)
 
 
 if __name__=="__main__":
-    # RUN(method_name="variational_admm_sfs",dataset_name="apple")
-    RUN(method_name="SIRFS",dataset_name="apple")
+    RUN(method_name="variational_admm_sfs",dataset_name="apple",tags=["natural light"])
+    RUN(method_name="SIRFS",dataset_name="apple",tags=["natural light"])
 

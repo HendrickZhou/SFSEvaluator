@@ -1,7 +1,7 @@
 import os
 
-# ondir must contains / in the end
 def create_dir(ondir=None, name=None,abs_name=None):
+    """ondir must contains / in the end"""
     if abs_name is None:
         abs_name=ondir+name
     if not os.path.isdir(abs_name):
@@ -16,12 +16,7 @@ def file_exist(ondir=None,name=None,abs_name=None):
     if not os.path.isfile(abs_name):
         return False
     return True
-        
-def display_mat():
-    pass
-# def create_file(path, name):
-#     if not os.
-
+       
 def Print(msg):
     print("********************")
     print("* "+msg)

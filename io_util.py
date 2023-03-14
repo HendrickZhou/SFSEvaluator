@@ -23,7 +23,7 @@ class DataType(Enum):
     NUMPY=auto()
     MATLAB=auto()
 
-def get_image(file_path:str, file_type:FileType, my_type:FileType)->any:
+def get_image(file_path:str, file_type:FileType, my_type:DataType)->any:
     """get image from file_type to my_type"""
     if(file_path==None):
         return None
@@ -38,18 +38,18 @@ def get_image(file_path:str, file_type:FileType, my_type:FileType)->any:
                 return img
         elif my_type is DataType.NUMPY:
             try:
-                Image.open(file_path)
+                img=Image.open(file_path)
             except Exception as e:
                 raise InvalidResourceError from e
             else:
-                return np.array()
+                return np.asarray(img)
         else:
             print("unsupported image type")
             raise IllegalTypeError
     elif file_type is FileType.MAT:
         if my_type is DataType.MATLAB:
             try:
-                img=eng.get_mat(file_path)
+                img=get_mat(file_path)
             except AssertionError as e:
                 raise WrongFormatError from e
             except InvalidResourceError:
@@ -78,7 +78,6 @@ def get_mat(file_path:str):
     """
     if file_path is None:
         return None
-    
     eng=get_eng()
     try:
         ret=eng.load(file_path)

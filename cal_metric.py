@@ -9,7 +9,9 @@ from openpyxl import Workbook,load_workbook
 from openpyxl.drawing.image import Image
 from util import file_exist,create_dir
 from config import METRIC_PATH
-import matplotlib.pyplot as plt
+import numpy as np
+from util import *
+
 
 class MetricDataObject:
     def __init__(self) -> None:
@@ -47,13 +49,13 @@ class MetricsDB:
         self._start_wb()
         return self
 
-    def __exit__(self):
+    def __exit__(self,type, value, traceback):
         print("saving new metrics data............")
         print("close connection to metrics data")
-        self.wb.save()
+        self.wb.save(self.xls_name)
 
     def _start_wb(self):
-        if file_exist(self.xls_name):
+        if file_exist(abs_name=self.xls_name):
             self.wb=load_workbook(filename=self.xls_name)
         else:
             wb=Workbook()
@@ -81,12 +83,12 @@ class MetricsDB:
         last_row=len(list(worksheet.rows))
         # handle image
         if m.depth_image is not None:
-            the_cell=worksheet.cell(last_row,self.dm_idx)
+            the_cell=worksheet.cell(last_row,self.dm_idx+1)
             the_cell.hyperlink=m.depth_image
             the_cell.value="link_depth"
             the_cell.style="Hyperlink"
         if m.gt_image is not None:
-            the_cell=worksheet.cell(last_row,self.gm_idx)
+            the_cell=worksheet.cell(last_row,self.gm_idx+1)
             the_cell.hyperlink=m.gt_image
             the_cell.value="link_gt"
             the_cell.style="Hyperlink"
@@ -118,7 +120,10 @@ def get_metrics(output:ThreeDObject, ground_truth:ThreeDObject, algorithm, datas
     print("MAE="+str(mae))
     print("RMSE="+str(rmse))
     # save the images
-    img_path=algorithm+"_"+dataset+"_"+tags+"/"
+    tag_str=""
+    for tag in tags:
+        tag_str+=str(tag)
+    img_path=algorithm+"_"+dataset+"_"+tag_str+"/"
     img_path=create_dir(ondir=METRIC_PATH, name=img_path)
     depth_path=img_path+"output_depth.png"
     gt_path=img_path+"gt_depth.png"
@@ -135,16 +140,47 @@ def get_metrics(output:ThreeDObject, ground_truth:ThreeDObject, algorithm, datas
     m.gt_image=gt_path
     return m
 
-def MAE(output_normal,gt_normal)->float:
+def MAE(output_normal:np.ma,gt_normal:np.ma)->float:
     """
     mean angular error
     assume those images are all normalized
-    """
-    pass
 
-def RMSE(output_dm, gt_dm)->float:
+    calculated by this formula:
+    e = atan2(norm(cross(el,ee)),dot(el,ee));
+    """
+    output_norm=output_normal.compressed()
+    size=output_norm.size
+    sum=0
+    (w,h,_)=output_normal.shape
+    for i in range(w):
+        for j in range(h):
+            output_norm_ij=output_normal[i,j].data
+            gt_norm_ij=gt_normal[i,j].data
+            e=np.arctan2(np.linalg.norm(np.cross(output_norm_ij,gt_norm_ij)),
+                     np.dot(output_norm_ij,gt_norm_ij)) 
+            sum+=e
+    return sum/size
+
+def RMSE(output_dm:np.ma, gt_dm:np.ma)->float:
     """
     root mean square error
     assume those images are all normalized
     """
-    pass
+    output_d=output_dm.compressed()
+    gt_d=gt_dm.compressed()
+    try:
+        assert output_d.size == gt_d.size
+    except AssertionError as ae:
+        raise
+    finally:
+        print("gt_d.size="+str(gt_d.size))
+        print("output_d.size="+str(output_d.size)) 
+    assert output_d.size == gt_d.size
+    return np.sqrt(np.mean((output_d-gt_d)**2))
+
+if __name__ == "__main__":
+    import pickle
+    m=pickle.load(open("test_m.p","rb"))
+    import pdb; pdb.set_trace()
+    with MetricsDB() as mdb:
+        mdb.add_result(m)
