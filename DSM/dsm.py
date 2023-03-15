@@ -17,10 +17,10 @@ Once registered, name should never be modified
 """
 
 from pathlib import Path
-from io_util import FileType
 import json
 import os, sys; sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 from config import *
+from io_util import FileType
 from llist import dllist,dllistnode
 from .descriptor import DSDescriptor,DESCRIPTOR_FILE_NAME
 
@@ -267,7 +267,7 @@ class DSM:
 
 if __name__=="__main__":
     dsm=DSM()
-    dsm.reg("dino")
+    dsm.reg("vase")
     dsm.reg("paper1")
     dsm.ls()
     r1=dsm.get_all()

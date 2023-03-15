@@ -32,6 +32,8 @@ class ThreeDObject():
         mask: should be a np.array convertable to bool array, 0 will be False, others are True
               since it's optional in logic, it can be all True
         normal: should be a 2d np.array float64
+
+        the depth image are normalized to 0-1
         """
         new_obj=cls()
         new_obj.depth=depth
@@ -46,11 +48,20 @@ class ThreeDObject():
         new_obj.n_ma = ma.array(new_obj.normal, mask=np.repeat(tmask[:,:,np.newaxis],3,axis=2))
         ma.set_fill_value(new_obj.d_ma,0)
         ma.set_fill_value(new_obj.n_ma,0)
+
+        new_obj.d_ma=cls.normalize(new_obj.d_ma)
         return new_obj
 
     @staticmethod
-    def normalize(img:np.array):
-        pass
+    def normalize(img:np.ma):
+        if img is None:
+            return
+        num_max=ma.max(img)
+        num_min=ma.min(img)
+        img-=num_min
+        img/=num_max
+        return img
+        
 
     def get_depth(self):
         """get the depth in numpy.ma format, with the mask property applied"""

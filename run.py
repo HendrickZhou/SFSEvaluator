@@ -74,14 +74,13 @@ def _run(codebase_obj:MethodObj, dataset_obj:DatasetObj, stereo_idx:int,tag_set)
             # TODO add type check!
             img=get_image(dataset_obj.get_image(stereo_idx),FileType.IMG, DataType.MATLAB)
             mask=get_image(dataset_obj.get_mask(stereo_idx),FileType.IMG,DataType.MATLAB) # TODO maybe support mat?
-            # l_struct=eng.struct2cell(eng.load(dataset_obj.get_light(stereo_idx)))
-            # light=l_struct[0]
+            # TODO make sure mask is 1-d
             light=get_mat(dataset_obj.get_light(stereo_idx))
             intrinsic=get_mat(dataset_obj.get_intrinsic(stereo_idx))
             if intrinsic is None:
                 intrinsic=eng.eye(3)
-            # shape_prior=get_mat(dataset_obj.get_shape_prior(stereo_idx))
-            shape_prior=get_mat(dataset_obj.get_ground_truth(stereo_idx))
+            shape_prior=get_mat(dataset_obj.get_shape_prior(stereo_idx))
+            # shape_prior=get_mat(dataset_obj.get_ground_truth(stereo_idx))
 
         except Exception as e:
             breaker()
@@ -158,6 +157,7 @@ def _run(codebase_obj:MethodObj, dataset_obj:DatasetObj, stereo_idx:int,tag_set)
         else:
             raise WrongFormatError("unsupported ground truth data type")
         gt_obj = ThreeDObject.from_data(depth=img_np, mask=mask)
+        # import pdb;pdb.set_trace()
         m=get_metrics(tdobj, gt_obj,algorithm,dataset,tag_set)
 
     # 4. save metrics on database
@@ -168,4 +168,6 @@ def _run(codebase_obj:MethodObj, dataset_obj:DatasetObj, stereo_idx:int,tag_set)
 if __name__=="__main__":
     RUN(method_name="variational_admm_sfs",dataset_name="apple",tags=["natural light"])
     RUN(method_name="SIRFS",dataset_name="apple",tags=["natural light"])
+    RUN(method_name="variational_admm_sfs", dataset_name="vase",tags=["light estimation"])
+    RUN(method_name="SIRFS", dataset_name="vase",tags=["light estimation"]) 
 

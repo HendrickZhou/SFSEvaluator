@@ -95,7 +95,10 @@ class MetricsDB:
 
 # cal all metrics
 def vis_metrics(output:ThreeDObject,algorithm,dataset,tags):
-    img_path=algorithm+"_"+dataset+"_"+tags+"/"
+    tag_str=""
+    for tag in tags:
+        tag_str+=str(tag)
+    img_path=algorithm+"_"+dataset+"_"+tag_str+"/"
     img_path=create_dir(ondir=METRIC_PATH, name=img_path)
     depth_path=img_path+"output_depth.png" 
     output.vis_and_save_depth(depth_path) 
