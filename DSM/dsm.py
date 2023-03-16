@@ -267,7 +267,7 @@ class DSM:
 
 if __name__=="__main__":
     dsm=DSM()
-    dsm.reg("vase")
+    dsm.reg("figure-mvs")
     dsm.reg("paper1")
     dsm.ls()
     r1=dsm.get_all()

@@ -143,7 +143,6 @@ class ThreeDObject():
         eng.imwrite(self.get_depth().filled(), path, nargout=0)
 
 
-
 if __name__=="__main__":
     # vis_normal = lambda normal: np.uint8((normal + 1) / 2 * 255)[..., ::-1]
 

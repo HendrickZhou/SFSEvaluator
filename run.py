@@ -79,9 +79,17 @@ def _run(codebase_obj:MethodObj, dataset_obj:DatasetObj, stereo_idx:int,tag_set)
             intrinsic=get_mat(dataset_obj.get_intrinsic(stereo_idx))
             if intrinsic is None:
                 intrinsic=eng.eye(3)
-            shape_prior=get_mat(dataset_obj.get_shape_prior(stereo_idx))
-            # shape_prior=get_mat(dataset_obj.get_ground_truth(stereo_idx))
-
+            shape_prior=get_image(dataset_obj.get_shape_prior(stereo_idx),
+                                  dataset_obj.get_shape_prior_type(stereo_idx),
+                                  DataType.MATLAB)
+            # if size don't match
+            iw=eng.size(img,1)
+            ih=eng.size(img,2)
+            sw=eng.size(shape_prior,1)
+            sh=eng.size(shape_prior,2)
+            if((iw,ih)!=(sw,sh)):
+                shape_prior=eng.imresize(shape_prior,matlab.double([iw,ih]))
+            
         except Exception as e:
             breaker()
             print("dataset load failed")
@@ -166,8 +174,12 @@ def _run(codebase_obj:MethodObj, dataset_obj:DatasetObj, stereo_idx:int,tag_set)
 
 
 if __name__=="__main__":
-    RUN(method_name="variational_admm_sfs",dataset_name="apple",tags=["natural light"])
-    RUN(method_name="SIRFS",dataset_name="apple",tags=["natural light"])
-    RUN(method_name="variational_admm_sfs", dataset_name="vase",tags=["light estimation"])
-    RUN(method_name="SIRFS", dataset_name="vase",tags=["light estimation"]) 
+    # RUN(method_name="variational_admm_sfs",dataset_name="apple",tags=["natural light"])
+    # RUN(method_name="SIRFS",dataset_name="apple",tags=["natural light"])
+    # RUN(method_name="variational_admm_sfs", dataset_name="vase",tags=["light estimation"])
+    # RUN(method_name="SIRFS", dataset_name="vase",tags=["light estimation"])
+    # RUN(method_name="variational_admm_sfs",dataset_name="augustus-ps",tags=["light estimation"]) 
+    # RUN(method_name="SIRFS", dataset_name="augustus-ps",tags=["light estimation"]) 
+    RUN(method_name="variational_admm_sfs", dataset_name="figure-mvs",tags=["strong shape prior"]) 
+    RUN(method_name="SIRFS", dataset_name="figure-mvs",tags=["strong shape prior"]) 
 
