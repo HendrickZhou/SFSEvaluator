@@ -5,7 +5,7 @@ install_requires=[
     # 'matlabengineforpython==9.13',
     'openpyxl==3.1.2',
     'Pillow==9.4.0',
-    'numpy==1.24.2',
+    'numpy',
 ]
 setup(
     name='sfseval',
