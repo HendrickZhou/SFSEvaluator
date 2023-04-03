@@ -2,7 +2,6 @@ from setuptools import setup
 
 install_requires=[
     'llist==0.7.1',
-    # 'matlabengineforpython==9.13',
     'openpyxl==3.1.2',
     'Pillow==9.4.0',
     'numpy',
