@@ -4,6 +4,7 @@ if [ -z "$1" ]
     echo "please provide the path to your matlab root"
     echo "you can open the matlab and type: matlabroot"
     echo "then copy and paste the result"
+    exit
 fi
 
 echo "It's highly recommended that you create a seperate Python virtual environment"
