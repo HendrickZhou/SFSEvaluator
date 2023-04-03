@@ -25,3 +25,6 @@ oldpwd=`pwd`
 cd "$matlabroot/extern/engines/python"
 python -m pip install .
 cd $oldpwd
+
+mkdir codebase
+mkdir dataset
