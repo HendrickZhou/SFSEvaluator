@@ -18,11 +18,11 @@ Once registered, name should never be modified
 
 from pathlib import Path
 import json
-import os, sys; sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
-from config import *
-from io_util import FileType
+# import os, sys; sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
+from sfseval.config import *
+from sfseval.io_util import FileType
 from llist import dllist,dllistnode
-from .descriptor import DSDescriptor,DESCRIPTOR_FILE_NAME
+from sfseval.DSM.descriptor import DSDescriptor,DESCRIPTOR_FILE_NAME
 
 INDEX_FILE="ds_index_file.json"
 

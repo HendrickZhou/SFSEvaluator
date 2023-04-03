@@ -4,7 +4,7 @@ author: Hang Zhou
 
 from CBM.cbm import MethodObj, CBM
 from DSM.dsm import DatasetObj, DSM
-from util import *
+from sfseval.util import *
 from io_util import *
 from cg_util import *
 from cal_metric import get_metrics,vis_metrics,MetricsDB
@@ -181,5 +181,5 @@ if __name__=="__main__":
     # RUN(method_name="variational_admm_sfs",dataset_name="augustus-ps",tags=["light estimation"]) 
     # RUN(method_name="SIRFS", dataset_name="augustus-ps",tags=["light estimation"]) 
     RUN(method_name="variational_admm_sfs", dataset_name="figure-mvs",tags=["strong shape prior"]) 
-    RUN(method_name="SIRFS", dataset_name="figure-mvs",tags=["strong shape prior"]) 
+    # RUN(method_name="SIRFS", dataset_name="figure-mvs",tags=["strong shape prior"]) 
 

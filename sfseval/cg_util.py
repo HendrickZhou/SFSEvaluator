@@ -5,7 +5,7 @@ define the depth object for SFS task
 
 import numpy as np
 import numpy.ma as ma
-from matlab_agent import get_eng
+from sfseval.matlab_agent import get_eng
 import matplotlib.pyplot as plt
 import matlab
 import open3d as o3d

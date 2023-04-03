@@ -1,5 +1,3 @@
-import exception
-
 class WrongFormatError(Exception):
     """data in wrong/unsupported format"""
     pass

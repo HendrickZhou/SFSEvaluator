@@ -7,10 +7,10 @@ All the functions need to calculate the metrics
 from cg_util import ThreeDObject
 from openpyxl import Workbook,load_workbook
 from openpyxl.drawing.image import Image
-from util import file_exist,create_dir
+from sfseval.util import file_exist,create_dir
 from config import METRIC_PATH
 import numpy as np
-from util import *
+from sfseval.util import *
 
 
 class MetricDataObject:

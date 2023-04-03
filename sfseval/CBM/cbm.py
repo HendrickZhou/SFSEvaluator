@@ -4,8 +4,7 @@
 
 from pathlib import Path
 import json
-import os, sys; sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
-from config import *
+from sfseval.config import *
 from llist import dllist,dllistnode
 
 INDEX_FILE="method_index_file.json"
