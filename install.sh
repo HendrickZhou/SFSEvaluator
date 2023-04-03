@@ -20,7 +20,8 @@ select yn in "Yes" "No"; do
 done
 
 pip install -e ./ # the scripts are editable
-matlabroot = $1
-cd "$matlabroot\extern\engines\python"
+matlabroot=$1
+oldpwd=`pwd`
+cd "$matlabroot/extern/engines/python"
 python -m pip install .
-cd -
+cd $oldpwd
