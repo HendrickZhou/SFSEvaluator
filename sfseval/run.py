@@ -158,9 +158,9 @@ def _run(codebase_obj:MethodObj, dataset_obj:DatasetObj, stereo_idx:int,tag_set)
         gt_type=dataset_obj.get_ground_truth_type(stereo_idx)
         gt_path=dataset_obj.get_ground_truth(stereo_idx)
         img_np=None
-        if gt_type is FileType.MAT:
+        if gt_type == FileType.MAT:
             img_np=get_image(gt_path,FileType.MAT,DataType.NUMPY)
-        elif gt_type is FileType.IMG:
+        elif gt_type == FileType.IMG:
             img_np=get_image(gt_path,FileType.IMG,DataType.NUMPY)
         else:
             raise WrongFormatError("unsupported ground truth data type")

@@ -7,7 +7,7 @@ image file(all)
 @Author: Hang Zhou
 """
 
-from enum import Enum,auto
+from enum import IntEnum,auto
 from sfseval.matlab_agent import get_eng
 from sfseval.my_exception import *
 import matlab
@@ -15,11 +15,11 @@ from math import isnan,nan
 from PIL import Image
 import numpy as np
 
-class FileType(Enum):
+class FileType(IntEnum):
     MAT=auto()
     IMG=auto()
 
-class DataType(Enum):
+class DataType(IntEnum):
     NUMPY=auto()
     MATLAB=auto()
 
@@ -27,8 +27,8 @@ def get_image(file_path:str, file_type:FileType, my_type:DataType)->any:
     """get image from file_type to my_type"""
     if(file_path==None):
         return None
-    if file_type is FileType.IMG:
-        if my_type is DataType.MATLAB:
+    if file_type == FileType.IMG:
+        if my_type == DataType.MATLAB:
             eng=get_eng()
             try:
                 img=eng.imread(file_path)
@@ -36,7 +36,7 @@ def get_image(file_path:str, file_type:FileType, my_type:DataType)->any:
                 raise InvalidResourceError from e
             else:
                 return img
-        elif my_type is DataType.NUMPY:
+        elif my_type == DataType.NUMPY:
             try:
                 img=Image.open(file_path)
             except Exception as e:
@@ -46,8 +46,8 @@ def get_image(file_path:str, file_type:FileType, my_type:DataType)->any:
         else:
             print("unsupported image type")
             raise IllegalTypeError
-    elif file_type is FileType.MAT:
-        if my_type is DataType.MATLAB:
+    elif file_type == FileType.MAT:
+        if my_type == DataType.MATLAB:
             try:
                 img=get_mat(file_path)
             except AssertionError as e:
@@ -56,7 +56,7 @@ def get_image(file_path:str, file_type:FileType, my_type:DataType)->any:
                 raise
             else:
                 return img 
-        elif my_type is DataType.NUMPY:
+        elif my_type == DataType.NUMPY:
             try:
                 mat=get_mat(file_path)
                 img=mat2np2d(mat)
