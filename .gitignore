@@ -1,6 +1,7 @@
 /codebase
 /dataset
 /dataset_raw
+/metrics_result
 **/__pycache__
 *.pyc
 venv/
