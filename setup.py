@@ -9,8 +9,10 @@ install_requires=[
 setup(
     name='sfseval',
     install_requires=install_requires,
-    packages=['sfseval','sfseval.CBM','sfseval.DSM'],
+    packages=['sfs','sfseval.CBM','sfseval.DSM'],
     entry_points={
-        
+       'console_scripts' : [
+            'sfs = sfseval.cli:main',
+       ] 
     },
 )

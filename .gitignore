@@ -1,6 +1,7 @@
 /codebase
 /dataset
 /dataset_raw
+/note
 /metrics_result
 **/__pycache__
 *.pyc
