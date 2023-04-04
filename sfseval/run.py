@@ -21,9 +21,15 @@ RUNTIME_FOLDER_NAME="sfs_evaluator_runtime"
 def RUN(method_id=None, dataset_id=None, method_name=None, dataset_name=None,tags=[]):
     cbm=CBM()
     dsm=DSM()
-    
-    codebase_obj=cbm.get_by_name(method_name)
-    dataset_obj=dsm.get_by_name(dataset_name)
+    if method_id is None:
+        codebase_obj=cbm.get_by_name(method_name)
+    else:
+        codebase_obj=cbm.get_by_id(method_id)
+
+    if dataset_id is None:
+        dataset_obj=dsm.get_by_name(dataset_name)
+    else:
+        dataset_obj=dsm.get_by_id(dataset_id)
     # process tags
     tag_set=set()
     for tag in tags:
@@ -47,7 +53,7 @@ def _run(codebase_obj:MethodObj, dataset_obj:DatasetObj, stereo_idx:int,tag_set)
     code_folder=codebase_obj.get_folder()
     code_api_name=codebase_obj.get_api_name()
 
-    runtime_dir=create_dir(ondir=code_folder,name=RUNTIME_FOLDER_NAME)
+    # runtime_dir=create_dir(ondir=code_folder,name=RUNTIME_FOLDER_NAME)
 
     # 1. preprocess the dataset to complete all necessary field
     # including ground truth
@@ -72,6 +78,7 @@ def _run(codebase_obj:MethodObj, dataset_obj:DatasetObj, stereo_idx:int,tag_set)
         # convert from file to matlab object
         try: 
             # TODO add type check!
+            # import pdb;pdb.set_trace()
             img=get_image(dataset_obj.get_image(stereo_idx),FileType.IMG, DataType.MATLAB)
             mask=get_image(dataset_obj.get_mask(stereo_idx),FileType.IMG,DataType.MATLAB) # TODO maybe support mat?
             # TODO make sure mask is 1-d
@@ -83,12 +90,13 @@ def _run(codebase_obj:MethodObj, dataset_obj:DatasetObj, stereo_idx:int,tag_set)
                                   dataset_obj.get_shape_prior_type(stereo_idx),
                                   DataType.MATLAB)
             # if size don't match
-            iw=eng.size(img,1)
-            ih=eng.size(img,2)
-            sw=eng.size(shape_prior,1)
-            sh=eng.size(shape_prior,2)
-            if((iw,ih)!=(sw,sh)):
-                shape_prior=eng.imresize(shape_prior,matlab.double([iw,ih]))
+            if shape_prior is not None:
+                iw=eng.size(img,1)
+                ih=eng.size(img,2)
+                sw=eng.size(shape_prior,1)
+                sh=eng.size(shape_prior,2)
+                if((iw,ih)!=(sw,sh)):
+                    shape_prior=eng.imresize(shape_prior,matlab.double([iw,ih]))
             
         except Exception as e:
             breaker()
