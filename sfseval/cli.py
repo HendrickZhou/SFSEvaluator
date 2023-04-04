@@ -8,7 +8,8 @@ from sfseval.run import RUN
 
 # sfs
 parser = argparse.ArgumentParser(prog="sfs",
-                                add_help=True)
+                                add_help=True,
+                                usage="sfs [-h] {dsm,cbm,run}")
 subparser = parser.add_subparsers(required=True)
 
 # sfs dsm
