@@ -37,9 +37,12 @@ Then you need to open the Matlab and type `matlabroot` in the console. Copy and 
 `'/Applications/MATLAB_R2022b.app'`
 
 ### install
-Now run the script: `bash install.sh`
+Now run the script: `bash install.sh path_to_matlabroot`
 
 Notice it will prompt you for a path to Matlab root. Follow the guide of prompt
+
+If you want to look at example code/dataset/metrics result, here's link:
+https://github.com/HendrickZhou/SFSEVAL_example_dataset_codebase
 
 ## 3. Dataset management
 You need to preprocess the data into either image file or .mat file with your own effort.
