@@ -66,6 +66,12 @@ group_run_codebase.add_argument("--cb_name","-cn",
 parser_run.add_argument("--tags",
                         nargs='*',
                         help="tags of this run")
+parser_run.add_argument("--seq_idx", "-si",
+                        nargs='?',
+                        default=0,
+                        const=0,
+                        dest="seq_idx",
+                        help="index of image in the dataset with sequence images")
 
 def main():
     global parser
@@ -105,7 +111,11 @@ def main():
             method_name = final_args.cb_name
         else:
             method_id = final_args.cb_id
-        RUN(method_id=method_id, dataset_id=dataset_id, method_name=method_name, dataset_name=dataset_name,tags=final_args.tags)
+
+        tags = []
+        if final_args.tags is not None:
+            tags=final_args.tags
+        RUN(method_id=method_id, dataset_id=dataset_id, method_name=method_name, dataset_name=dataset_name,tags=tags,stereo_idx=final_args.seq_idx)
     
 if __name__ == "__main__":
     main()

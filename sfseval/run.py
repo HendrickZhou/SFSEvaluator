@@ -18,7 +18,8 @@ dataset_obj: link to the dataset directory
 
 RUNTIME_FOLDER_NAME="sfs_evaluator_runtime"
 
-def RUN(method_id=None, dataset_id=None, method_name=None, dataset_name=None,tags=[]):
+
+def RUN(method_id=None, dataset_id=None, method_name=None, dataset_name=None, tags=[], stereo_idx: int=0):
     cbm=CBM()
     dsm=DSM()
     if method_id is None:
@@ -34,7 +35,7 @@ def RUN(method_id=None, dataset_id=None, method_name=None, dataset_name=None,tag
     tag_set=set()
     for tag in tags:
         tag_set.add(tag)
-    _run(codebase_obj,dataset_obj,0,tag_set)
+    _run(codebase_obj,dataset_obj,stereo_idx,tag_set)
 
 def _run(codebase_obj:MethodObj, dataset_obj:DatasetObj, stereo_idx:int,tag_set):
     """

@@ -183,6 +183,10 @@ or you can run:
 sfs run --ds_id your_dataset_id --cb_id your_codebase_id --tag your_tags_to_this_evluation
 ```
 The id can be found by running `sfs cbm --list` and `sfs dsm --list` commands.
+If you're running on a dataset with multiple images, a optional argument `--seq_idx` can be used to indicate which image you want to use(starting from 0). If not provided, by default the idx is 0. Example:
+```
+sfs run --ds_id your_dataset_id --cb_name your_codebase_name --seq_idx 1
+```
 ### Tags
 The purpose of tag is to distinguish the evaluation with different hyperparameters. For example, you can run an algorithm with some virtual hyperparameter a=1. Next time you want to run it with a=2. You can use `--tag a_1` and `--tag a_2` for example.
 
