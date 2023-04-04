@@ -8,15 +8,13 @@ from sfseval.run import RUN
 
 # sfs
 parser = argparse.ArgumentParser(prog="sfs",
-                                add_help=True,
-                                usage="sfs [-h] {dsm,cbm,run}")
+                                add_help=True)
 subparser = parser.add_subparsers(required=True)
 
 # sfs dsm
 parser_dsm = subparser.add_parser("dsm",
                         description="dataset management",
-                        add_help=True,
-                        aliases="dataset")
+                        add_help=True)
 parser_dsm.set_defaults(which="dsm")
 group_dsm = parser_dsm.add_mutually_exclusive_group(required=True)
 group_dsm.add_argument("--list", "-ls",
@@ -31,8 +29,7 @@ group_dsm.add_argument("--register", "-reg",
 # sfs cbm
 parser_cbm = subparser.add_parser("cbm",
                         description="codebase management",
-                        add_help=True,
-                        aliases="codebase")
+                        add_help=True)
 parser_cbm.set_defaults(which="cbm")
 group_cbm = parser_cbm.add_mutually_exclusive_group(required=True)
 group_cbm.add_argument("--list", "-ls",
